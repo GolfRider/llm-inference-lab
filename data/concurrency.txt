@@ -1,0 +1,30 @@
+# Day 4: latency/throughput vs concurrency
+# Model: Qwen/Qwen2.5-7B-Instruct on vLLM 0.6.6.post1, NVIDIA A40 48GB
+# Fixed output = 64 tokens, 4 requests per concurrent slot
+
+# --- Run A: short prompts (~512 tokens) ---
+ conc    tok/s   TTFT_ms  queue_ms  run  wait    kv%  preempt
+    1     33.5      73.6       0.4    1     0   0.1        0
+    2     63.8     132.2       0.6    2     0   0.3        0
+    4    118.9     181.0       0.8    4     0   0.5        0
+    8    208.6     395.6       1.1    8     0   1.0        0
+   16    337.9     825.9       2.5   16     0   2.1        0
+   32    410.5    2785.5       4.9    0     0   0.0        0
+   64    566.8    4130.0       9.7   64     0   8.2        0
+# Throughput scales to ~567 tok/s; queue stays near zero -> COMPUTE-BOUND.
+# (conc=32 row shows run=0/kv%=0: gauge sampling artifact, not real.)
+
+# --- Run B: long prompts (~4000 tokens) ---
+ conc    tok/s   TTFT_ms  queue_ms  run  wait    kv%  preempt
+    1     26.5     524.0       1.2    0     0   0.0        0
+    2     42.7     535.4       1.3    0     0   0.0        0
+    4     55.8    1679.0       2.4    0     0   0.0        0
+    8     79.4    3367.3       4.3    0     0   0.0        0
+   16     84.0    6379.0    2016.9    0     0   0.0        0
+   32     93.0   10950.0    6399.8    0     0   0.0        0
+   48     97.8   15661.4   11144.2    0     0   0.0        0
+# Throughput collapses to ~98 tok/s; queue explodes 4ms->11s between conc 8 and 16
+#   -> CAPACITY-BOUND (KV cache full, requests can't be admitted, they wait).
+# Same symptom (slow), same GPU busy, opposite cause vs Run A.
+# Note: run/kv%/preempt gauges read 0 due to single-snapshot sampling;
+#   histogram metrics (TTFT, queue) are the trustworthy ones.

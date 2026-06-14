@@ -1,0 +1,16 @@
+# Day 3: TTFT vs context length
+# Model: Qwen/Qwen2.5-7B-Instruct on vLLM 0.6.6.post1, NVIDIA A40 48GB
+# Fixed output = 64 tokens, concurrency = 1, 5 requests per length
+
+ in_tok   TTFT_ms  prefill_ms  decode_ms  TPOT_ms    kv%
+    121      37.3        36.5     1831.1    29.07   0.0
+    511      73.6        73.1     1818.1    28.86   0.0
+   2041     261.8       260.9     1824.4    28.96   0.0
+   8191    1736.0      1734.0     1934.3    30.70   0.0
+
+# Prefill scaling (equal 4x input jumps):
+#   128->512:   input x4.2, prefill x2.0  (sub-linear, fixed overhead dominates)
+#   512->2048:  input x4.0, prefill x3.6  (~linear)
+#   2048->8192: input x4.0, prefill x6.6  (super-linear -> attention O(n^2))
+# TTFT tracks prefill within ~1ms (no queue at concurrency 1).
+# TPOT flat ~29ms, creeps to 30.7ms at 8k (decode attends over longer KV cache).
