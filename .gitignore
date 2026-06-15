@@ -5,4 +5,4 @@ venv/
 .env
 *token*
 *.key
-*.tmp
+*.tmp.idea/

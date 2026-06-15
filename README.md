@@ -25,8 +25,7 @@ is not one problem; the same symptom has different causes and different fixes.
   different cause.
 
 ## Concepts
-To know more about inference terms (TTFT, TPOT, prefill, decode, KV cache)
-See the [glossary](notes/inference-glossary.md).
+Key inference terms (TTFT, TPOT, prefill, decode, KV cache) are defined in the [glossary](notes/inference-glossary.md).
 
 ## Status
 Single-node diagnostics. Next: Prometheus/Grafana dashboards, and inference-
