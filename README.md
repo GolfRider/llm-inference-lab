@@ -2,7 +2,7 @@
 
 A hands-on lab measuring how LLM inference behaves on a single GPU, from a
 Kubernetes platform engineer's perspective. Backs the talk
-"From HTTP Services to Token Services: Diagnosing LLM Inference on Kubernetes."
+"From Request to Token: Diagnosing LLM Inference on Kubernetes."
 
 ## The problem
 
